@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 
     public float walkSpeed = 1.0f;
     public float turnSpeed = 20f;
+    public float sprintMultiplier = 2;
 
     Rigidbody m_Rigidbody;
     Vector3 m_Movement;
@@ -41,6 +42,9 @@ public class PlayerMovement : MonoBehaviour
         m_Rotation = Quaternion.LookRotation (desiredForward);
         
         m_Rigidbody.MoveRotation (m_Rotation);
-        m_Rigidbody.MovePosition (m_Rigidbody.position + m_Movement * walkSpeed * Time.deltaTime);
+        bool isSprinting = Keyboard.current.leftShiftKey.isPressed;
+        float speed = isSprinting ? walkSpeed * sprintMultiplier : walkSpeed;
+
+        m_Rigidbody.MovePosition (m_Rigidbody.position + m_Movement * speed * Time.deltaTime);
     }
 }
