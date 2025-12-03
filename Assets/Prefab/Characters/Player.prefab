@@ -148,6 +148,7 @@ MonoBehaviour:
     m_Flags: 0
   walkSpeed: 1
   turnSpeed: 20
+  sprintMultiplier: 2
 --- !u!1001 &6912469098402734139
 PrefabInstance:
   m_ObjectHideFlags: 0
