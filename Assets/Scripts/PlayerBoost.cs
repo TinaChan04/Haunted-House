@@ -3,84 +3,83 @@ using UnityEngine.UI;
 
 public class PlayerBoost : MonoBehaviour
 {
-    [Header("Boost Settings")]
     public float boostMultiplier = 3f;
-    public float boostDuration = 2f;
-    public float boostCooldown = 5f;
+    public float boostTime = 2f;
+    public float cooldownTime = 5f;
 
-    [Header("UI")]
-    public Image boostIcon;
+    public Text boostStatusText;
+    public Text boostCooldownText;
 
-    private bool boostReady = true;
-    private bool isBoosting = false;
+    PlayerMovement move;
 
-    private float boostTimer = 0f;
-    private float cooldownTimer = 0f;
+    bool isBoosting = false;
+    bool canBoost = true;
 
-    private PlayerMovement movement;
+    float boostCounter;
+    float cooldownCounter;
 
     void Start()
     {
-        movement = GetComponent<PlayerMovement>();
-        UpdateIcon();
+        move = GetComponent<PlayerMovement>();
+
+        if (boostStatusText) boostStatusText.gameObject.SetActive(false);
+        if (boostCooldownText) boostCooldownText.gameObject.SetActive(false);
     }
 
     void Update()
     {
-        // Boost duration countdown
         if (isBoosting)
         {
-            boostTimer -= Time.deltaTime;
-            if (boostTimer <= 0f)
-                EndBoost();
-        }
-
-        // Cooldown countdown
-        if (!boostReady && !isBoosting)
-        {
-            cooldownTimer -= Time.deltaTime;
-            if (cooldownTimer <= 0f)
+            boostCounter -= Time.deltaTime;
+            if (boostCounter <= 0)
             {
-                boostReady = true;
-                if (boostIcon) boostIcon.gameObject.SetActive(true);
+                StopBoost();
             }
         }
 
-        UpdateIcon();
+        if (!canBoost && !isBoosting)
+        {
+            cooldownCounter -= Time.deltaTime;
+
+            if (boostCooldownText)
+                boostCooldownText.text = "Cooldown: " + Mathf.Ceil(cooldownCounter) + "s";
+
+            if (cooldownCounter <= 0)
+            {
+                canBoost = true;
+                if (boostCooldownText) boostCooldownText.gameObject.SetActive(false);
+            }
+        }
     }
 
     public void ActivateBoost()
     {
-        if (!boostReady) return;
+        if (!canBoost) return;
 
         isBoosting = true;
-        boostReady = false;
+        canBoost = false;
 
-        boostTimer = boostDuration;
-        movement.currentSpeedMultiplier = boostMultiplier;
+        boostCounter = boostTime;
+        move.currentSpeedMultiplier = boostMultiplier;
 
-        if (boostIcon) boostIcon.gameObject.SetActive(false);
+        if (boostStatusText)
+        {
+            boostStatusText.text = "Speed Boost Active!";
+            boostStatusText.gameObject.SetActive(true);
+        }
     }
 
-    void EndBoost()
+    void StopBoost()
     {
         isBoosting = false;
+        move.currentSpeedMultiplier = 1f;
 
-        movement.currentSpeedMultiplier = 1f;
-        cooldownTimer = boostCooldown;
+        cooldownCounter = cooldownTime;
+
+        if (boostStatusText) boostStatusText.gameObject.SetActive(false);
+        if (boostCooldownText) boostCooldownText.gameObject.SetActive(true);
     }
 
-    void UpdateIcon()
-    {
-        if (!boostIcon) return;
-
-        if (isBoosting)
-            boostIcon.color = Color.cyan;
-        else if (boostReady)
-            boostIcon.color = Color.white;
-        else
-            boostIcon.color = new Color(1,1,1,0.3f);
-    }
     public bool IsBoosting()
     {
         return isBoosting;
